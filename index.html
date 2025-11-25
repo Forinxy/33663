@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>排班日历</title>
+<style>
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: 'Segoe UI', sans-serif;
+    -webkit-tap-highlight-color: transparent;
+}
+
+  *{margin:0;padding:0;box-sizing:border-box}
+  body{font-family:"Microsoft YaHei";display:flex;justify-content:center;background:#222;color:#fff;padding:20px}
+  .box{background:#333;border-radius:12px;padding:20px;width:360px}
+  .nav{display:flex;justify-content:space-between;margin-bottom:12px}
+  button{background:#555;border:none;color:#fff;padding:6px 12px;border-radius:6px;cursor:pointer}
+  .legend{display:flex;justify-content:center;gap:12px;margin-bottom:12px;font-size:13px}
+  .cal{display:grid;grid-template-columns:repeat(7,1fr);gap:4px;text-align:center}
+  .day{height:54px;background:#444;border-radius:6px;display:flex;flex-direction:column;justify-content:center;font-size:12px;position:relative}
+  .mor{color:#ffa}
+  .nit{color:#aaf}
+  .del{position:absolute;top:2px;right:4px;font-size:10px;color:#fc0;font-weight:bold}
+  /* 今天高亮 */
+  .today{box-shadow:0 0 0 2px #0f0, inset 0 0 4px #0f0}
+</style>
+</head>
+<body>
+<div class="box">
+  <div class="nav">
+    <button id="prev">上月</button>
+    <span id="my"></span>
+    <button id="next">下月</button>
+  </div>
+  <div class="legend">
+    <span class="mor">早班</span>|<span class="nit">晚班</span>|<span class="del">●来货</span>
+  </div>
+  <div class="cal" id="cal"></div>
+</div>
+
+<script>
+const base = new Date(2025,10,24);       // 2025-11-24
+const pattern = [
+  ['L','H'], // 11-24
+  ['Y','L'], // 11-25
+  ['H','Y']  // 11-26
+];
+let y = base.getFullYear(), m = base.getMonth();
+
+const today = new Date();          // 今天
+function draw(){
+  const mo = new Date(y,m,1);
+  const fd = mo.getDay();
+  const md = new Date(y,m+1,0).getDate();
+  const monthNames = ['1月','2月','3月','4月','5月','6月','7月','8月','9月','10月','11月','12月'];
+  document.getElementById('my').textContent = y+'年'+monthNames[m];
+  let html='';
+  for(let i=0;i<fd;i++) html+='<div></div>';
+  for(let d=1;d<=md;d++){
+    const diff = Math.floor((new Date(y,m,d)-base)/864e5);
+    const [mor,nit] = pattern[(diff%3+3)%3];
+    const del = diff%2===0 ? '<i class="del">●</i>' : '';
+    const isToday = y===today.getFullYear() && m===today.getMonth() && d===today.getDate();
+    html+=`<div class="day ${isToday?'today':''}">${d}<div class="mor">${mor}</div><div class="nit">${nit}</div>${del}</div>`;
+  }
+  document.getElementById('cal').innerHTML=html;
+}
+document.getElementById('prev').onclick=()=>{m--;if(m<0){m=11;y--}draw()};
+document.getElementById('next').onclick=()=>{m++;if(m>11){m=0;y++}draw()};
+
+/* 自动定位到今天所在年月 */
+y = today.getFullYear();
+m = today.getMonth();
+draw();
+</script>
+</body>
+</html>
